@@ -1,25 +1,19 @@
 #!/bin/bash
-# 
-
 #Get current date
-currentdate=$(date +%s)
+currentdate=$(date +%y%m%d)
+#Find user expiration date
+userexp=$(chage -l $1 | awk  '/^Password expires/ { print $NF}')
 
-# find expiration date of user
-userexp=$(chage -l isadmin | awk '/^Password expires/ { print $NF }')
+passexp=$(date -d "$userexp" "+%y%m%d")
 
-# convert expiration date to seconds
-passexp=$(date -d "$userexp" "+%s")
-
-if [ $passexp != "never" ]
+if [[ $userexp != never ]]
 then
-    # find the remaining days for expiry
-    (( exp = passexp - currentdate))
+       (( exp =  passexp - currentdate  ))
 
-    # convert remaining days from sec to days
-    (( expday =  exp / 86400 ))
-
-    if ((expday < 10 ))
-    then
-        echo "Your password gonna expire, please change as soon as possible!!!"
-    fi
+       if (( exp <=  5 ))
+           then
+               echo "You have $exp days left or less to change your password"
+       fi
+           else
+       echo "Your password is set to never expire"
 fi
